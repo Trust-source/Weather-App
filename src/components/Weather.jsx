@@ -8,12 +8,14 @@ import Rainy from '../Assets/Rainy.png'
 import Snowy from '../Assets/Snowy.png'
 import Sunny from '../Assets/Sunny.png'
 import Windy from '../Assets/Windy.png'
+import Loading from '../Assets/Loading.png'
 
 
 const Weather = () => {
 
   const inputRef = useRef()
   const [weatherData, setWeatherData]=useState(false);
+  const [loader,setLoader] = useState(false);
 
   const allIcons ={
     "01d":  Sunny,
@@ -38,6 +40,7 @@ const Weather = () => {
       return;
     }
     try{
+      setLoader(true);
       const API_KEY= "22de600dd04d19b561ddab89793c0177"
       const url =`https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${API_KEY}`;
 
@@ -48,8 +51,10 @@ const Weather = () => {
 
       if(!response.ok){
         alert(data.message);
+        setLoader(false);
         return;
       }
+  
       const icon = allIcons[data.weather[0].icon] || Sunny;
       setWeatherData({
         humidity: data.main.humidity,
@@ -62,6 +67,9 @@ const Weather = () => {
       setWeatherData(false);
       console.error("Error in fetching data");
     }
+    finally {
+      setLoader(false); 
+    }
   }
 
   useEffect(()=>{
@@ -73,7 +81,14 @@ const Weather = () => {
         <input ref={inputRef} type="text" placeholder='Search'/>
         <img src={Search_icon} alt=""  onClick={()=>search(inputRef.current.value)}/>
       </div>
-      {weatherData?<>
+      {
+      loader ? (
+        <div className="Loading">
+          <img src={Loading} alt="Loading..." />
+          <p>Loading...</p>
+        </div>
+      ):
+      (weatherData?<>
         <img src={weatherData.icon} alt="" className='Weather-icon' />
       <p className='Temperature'>{weatherData.temperature}</p>
       <p className='Location'>{weatherData.location}</p>
@@ -93,7 +108,7 @@ const Weather = () => {
           </div>
         </div>
       </div>
-      </>:<></>}
+      </>:<></>)}
       
     </div>
   )
